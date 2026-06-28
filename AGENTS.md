@@ -109,7 +109,10 @@ throws on failure; add a `source(...)` call in `aggregate.ts`; add the field to
 `Component extends DCLogic`. The page must be served at a `.dc.html` path so the runtime
 infers the root name (`/` redirects to `/dashboard.dc.html`). Editable props live in the
 `data-props` attribute: `accent`, `defaultTheme`, `autoRefresh`, `autoRefreshSec`,
-`apiBase` (set when the frontend is hosted separately from the API). Keep template edits
+`apiBase` (set when the frontend is hosted separately from the API). The initial
+light/dark theme follows the visitor's OS `prefers-color-scheme` (and live-updates
+with it until the user clicks the toggle); `defaultTheme` is only the fallback when
+`matchMedia` is unavailable. Keep template edits
 minimal — structure already matches the backend shapes; you mostly only change bindings.
 
 ## Git / PR conventions

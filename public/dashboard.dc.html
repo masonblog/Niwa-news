@@ -193,7 +193,14 @@ class Component extends DCLogic {
   }
 
   componentDidMount(){
-    this.setState({ theme: (this.props.defaultTheme === 'light' ? 'light' : 'dark') });
+    this.setState({ theme: this.systemTheme() });
+    // Follow the visitor's OS light/dark preference until they toggle manually.
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      this._mql = window.matchMedia('(prefers-color-scheme: dark)');
+      this._onScheme = (e) => { if (!this._userSet) this.setState({ theme: e.matches ? 'dark' : 'light' }); };
+      this._mql.addEventListener ? this._mql.addEventListener('change', this._onScheme)
+                                 : this._mql.addListener(this._onScheme);
+    }
     this.tick();
     this._clk = setInterval(() => this.tick(), 1000);
     this.fetchData(false);
@@ -202,7 +209,21 @@ class Component extends DCLogic {
       this._auto = setInterval(() => this.fetchData(false), ms);
     }
   }
-  componentWillUnmount(){ clearInterval(this._clk); clearInterval(this._auto); }
+  componentWillUnmount(){
+    clearInterval(this._clk); clearInterval(this._auto);
+    if (this._mql) {
+      this._mql.removeEventListener ? this._mql.removeEventListener('change', this._onScheme)
+                                    : this._mql.removeListener(this._onScheme);
+    }
+  }
+
+  // Visitor's OS preference; falls back to the defaultTheme prop when matchMedia is unavailable.
+  systemTheme(){
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return this.props.defaultTheme === 'light' ? 'light' : 'dark';
+  }
 
   apiUrl(force){
     const base = (this.props.apiBase || '').replace(/\/+$/, '');
@@ -246,7 +267,7 @@ class Component extends DCLogic {
       setTimeout(() => this.setState({ refreshing:false }), 400);
     });
   }
-  toggle(){ this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })); }
+  toggle(){ this._userSet = true; this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })); }
 
   renderVals(){
     const theme = this.state.theme || 'dark';
