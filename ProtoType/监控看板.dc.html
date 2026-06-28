@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0}
+:root,[data-theme=dark]{--bg:#0d0f11;--bg2:#101316;--panel:#15181c;--panel2:#1c2127;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.11);--text:#e7e9ec;--muted:#8b929b;--faint:#5b636d;--up:#34d399;--down:#f87171}
+[data-theme=light]{--bg:#eceef1;--bg2:#f4f5f7;--panel:#ffffff;--panel2:#f4f6f8;--border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);--text:#15181c;--muted:#5d646d;--faint:#9aa1aa;--up:#15a34a;--down:#dc2626}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</helmet>
+<div data-screen-label="监控看板" data-theme="{{ theme }}" style="--accent:{{ accent }};height:100vh;overflow:hidden;background:var(--bg,#0d0f11);color:var(--text,#e7e9ec);font-family:Manrope,system-ui,-apple-system,sans-serif;padding:14px;display:flex;flex-direction:column;gap:12px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:space-between;background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:11px 16px">
+    <div style="display:flex;flex-direction:column;gap:4px;min-width:160px">
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="width:9px;height:9px;border-radius:50%;background:var(--accent,#3ddc84);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent,#3ddc84) 22%,transparent);animation:pulse 2.2s infinite"></span>
+        <span style="font:800 17px/1 Manrope;letter-spacing:.01em">监控看板</span>
+        <span style="font:700 9px/1 Manrope;letter-spacing:.16em;color:var(--accent,#3ddc84);border:1px solid color-mix(in srgb,var(--accent,#3ddc84) 42%,transparent);padding:3px 6px;border-radius:5px">LIVE</span>
+      </div>
+      <div style="font:500 11px/1 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">最近更新 · {{ lastUpdated }} CST</div>
+    </div>
+
+    <div style="display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap">
+      <sc-for list="{{ clockData }}" as="c" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 18px;border-left:1px solid var(--border,rgba(255,255,255,.06))">
+          <div style="font:700 9px/1 Manrope;letter-spacing:.16em;text-transform:uppercase;color:var(--muted,#8b929b)">{{ c.city }} · {{ c.off }}</div>
+          <div style="font:600 23px/1 'JetBrains Mono',monospace;letter-spacing:.02em">{{ c.time }}</div>
+          <div style="font:500 10px/1 Manrope;color:var(--faint,#5b636d)">{{ c.date }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onClick="{{ onRefresh }}" style="display:flex;align-items:center;gap:7px;background:var(--accent,#3ddc84);color:#06140b;border:none;border-radius:9px;padding:9px 15px;font:700 12px Manrope;cursor:pointer" style-hover="filter:brightness(1.08)">
+        <svg viewBox="0 0 16 16" width="14" height="14" style="animation:{{ spinAnim }}"><path d="M13.6 8a5.6 5.6 0 1 1-1.74-4.05" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path><path d="M13.9 2.2 14 5.4 10.8 5.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        刷新
+      </button>
+      <button onClick="{{ onToggle }}" aria-label="切换主题" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:var(--panel2,#1c2127);color:var(--text,#e7e9ec);border:1px solid var(--border2,rgba(255,255,255,.11));border-radius:9px;cursor:pointer" style-hover="border-color:var(--accent,#3ddc84)">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 16 16" width="16" height="16"><path d="M13.6 9.4A5.4 5.4 0 0 1 6.6 2.4 5.5 5.5 0 1 0 13.6 9.4z" fill="currentColor"></path></svg>
+        </sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="3.1" fill="currentColor"></circle><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="1.1" x2="8" y2="2.7"></line><line x1="8" y1="13.3" x2="8" y2="14.9"></line><line x1="1.1" y1="8" x2="2.7" y2="8"></line><line x1="13.3" y1="8" x2="14.9" y2="8"></line><line x1="3.2" y1="3.2" x2="4.3" y2="4.3"></line><line x1="11.7" y1="11.7" x2="12.8" y2="12.8"></line><line x1="12.8" y1="3.2" x2="11.7" y2="4.3"></line><line x1="4.3" y1="11.7" x2="3.2" y2="12.8"></line></g></svg>
+        </sc-if>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:12px;flex:1;min-height:0;grid-auto-rows:minmax(0,1fr)">
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>服务器负载</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">web-prod-01</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;flex:1;justify-content:space-between">
+        <sc-for list="{{ server }}" as="m" hint-placeholder-count="3">
+          <div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+              <div style="min-width:0">
+                <div style="font:600 10px/1 Manrope;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b)">{{ m.label }}</div>
+                <div style="font:600 24px/1.1 'JetBrains Mono',monospace;margin-top:4px;color:{{ m.barColor }}">{{ m.big }}</div>
+              </div>
+              <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:78px;height:26px;overflow:visible"><polyline points="{{ m.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:var(--accent,#3ddc84)"></polyline></svg>
+            </div>
+            <div style="height:6px;border-radius:99px;background:var(--border2,rgba(255,255,255,.11));overflow:hidden"><div style="height:100%;border-radius:99px;background:{{ m.barColor }};width:{{ m.pct }}%;transition:width .6s ease"></div></div>
+            <div style="font:500 11px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:6px">{{ m.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>指数行情</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">实时</span>
+      </div>
+      <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between">
+        <sc-for list="{{ indices }}" as="x" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:7px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
+            <div style="min-width:0"><div style="font:700 14px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
+            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:58px;height:24px;overflow:visible"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
+            <div style="text-align:right;min-width:90px"><div style="font:600 15px 'JetBrains Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'JetBrains Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.pct }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>持仓股票</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">5 个标的</span>
+      </div>
+      <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between">
+        <sc-for list="{{ holdings }}" as="x" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:5px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
+            <div style="min-width:0"><div style="font:700 14px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
+            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:54px;height:22px;overflow:visible"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
+            <div style="text-align:right;min-width:96px"><div style="font:600 15px 'JetBrains Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'JetBrains Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.chg }} {{ x.pct }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,1fr));gap:12px;flex:1;min-height:0;grid-auto-rows:minmax(0,1fr)">
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:#ff6600"></span>Hacker News</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">Top 10</span>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px">
+      <sc-for list="{{ hn }}" as="h" hint-placeholder-count="10">
+        <a href="#" style="display:grid;grid-template-columns:22px 1fr;gap:11px;padding:9px 4px;border-top:1px solid var(--border,rgba(255,255,255,.06));text-decoration:none;color:inherit" style-hover="background:var(--panel2,#1c2127)">
+          <div style="font:700 13px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);text-align:right">{{ h.rank }}</div>
+          <div style="min-width:0">
+            <div style="font:600 13px/1.35 Manrope;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ h.title }}</div>
+            <div style="font:500 11px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:4px;display:flex;gap:11px;flex-wrap:wrap"><span style="color:#ff6600">▲ {{ h.points }}</span><span>{{ h.comments }} 评论</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.domain }}</span></div>
+          </div>
+        </a>
+      </sc-for>
+      </div>
+    </div>
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--text,#e7e9ec)"></span>GitHub Trending</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">Today</span>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px">
+      <sc-for list="{{ github }}" as="g" hint-placeholder-count="10">
+        <a href="#" style="display:grid;grid-template-columns:22px 1fr;gap:11px;padding:9px 4px;border-top:1px solid var(--border,rgba(255,255,255,.06));text-decoration:none;color:inherit" style-hover="background:var(--panel2,#1c2127)">
+          <div style="font:700 13px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);text-align:right">{{ g.rank }}</div>
+          <div style="min-width:0">
+            <div style="font:600 13px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.name }}</div>
+            <div style="font:500 11px/1.4 Manrope;color:var(--muted,#8b929b);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin:3px 0 5px">{{ g.desc }}</div>
+            <div style="font:500 11px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);display:flex;gap:13px;align-items:center;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:50%;background:{{ g.langColor }}"></span>{{ g.lang }}</span>
+              <span>★ {{ g.stars }}</span>
+              <span style="color:var(--up,#34d399)">+{{ g.today }} today</span>
+            </div>
+          </div>
+        </a>
+      </sc-for>
+      </div>
+    </div>
+
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Manrope;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--down,#f87171)"></span>新浪财经要闻</span>
+        <span style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d)">Top 10</span>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px">
+      <sc-for list="{{ sina }}" as="s" hint-placeholder-count="10">
+        <a href="#" style="display:grid;grid-template-columns:22px 1fr auto;gap:11px;padding:10px 4px;border-top:1px solid var(--border,rgba(255,255,255,.06));align-items:center;text-decoration:none;color:inherit" style-hover="background:var(--panel2,#1c2127)">
+          <div style="font:700 13px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);text-align:right">{{ s.rank }}</div>
+          <div style="min-width:0"><div style="font:600 13px/1.4 Manrope;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ s.title }}</div><div style="font:600 9px/1 Manrope;letter-spacing:.04em;color:var(--accent,#3ddc84);margin-top:5px;display:inline-block;border:1px solid color-mix(in srgb,var(--accent,#3ddc84) 38%,transparent);padding:2px 5px;border-radius:4px">{{ s.tag }}</div></div>
+          <div style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);white-space:nowrap">{{ s.time }}</div>
+        </a>
+      </sc-for>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#ff7847&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;外观&quot;,&quot;options&quot;:[&quot;#3ddc84&quot;,&quot;#ff7847&quot;,&quot;#4d9fff&quot;,&quot;#e5484d&quot;]},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;section&quot;:&quot;外观&quot;},&quot;autoRefresh&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;行为&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = { theme:null, refreshing:false, lastUpdated:'--:--:--', clockData:[], server:[], indices:[], holdings:[], hn:[], github:[], sina:[] };
+    this.clocks = [
+      {city:'北京', tz:'Asia/Shanghai', off:'UTC+8'},
+      {city:'洛杉矶', tz:'America/Los_Angeles', off:'UTC-7'},
+      {city:'纽约', tz:'America/New_York', off:'UTC-4'}
+    ];
+    this.hnRaw = [
+      {title:'Show HN: A tiny SQLite-backed job queue in 400 lines of Go', domain:'github.com', by:'tobias'},
+      {title:'The hidden cost of microservices nobody talks about', domain:'blog.kessler.dev', by:'mkessler'},
+      {title:'Rewriting our build system cut CI time by 70%', domain:'eng.figcraft.io', by:'danab'},
+      {title:'Why we moved from Kubernetes back to bare metal', domain:'serverside.gg', by:'ops_anna'},
+      {title:'A visual guide to how CPUs do branch prediction', domain:'lowlevel.cafe', by:'reginald'},
+      {title:'Postgres is enough for most startups', domain:'rohan.codes', by:'rohan_p'},
+      {title:'I built a mechanical keyboard firmware from scratch', domain:'keebs.fyi', by:'clack'},
+      {title:'The math behind modern image compression, explained', domain:'pixels.observer', by:'jpeg_nerd'},
+      {title:'Ask HN: What is your favorite underrated CLI tool?', domain:'news.ycombinator.com', by:'curious_dev'},
+      {title:'Lessons from running a one-person SaaS for five years', domain:'soloship.email', by:'maya'}
+    ];
+    this.ghRaw = [
+      {name:'nordstack/aurora-ui', desc:'Headless, accessible component primitives for React', lang:'TypeScript', langColor:'#3178c6'},
+      {name:'quark-rs/tensor-lite', desc:'A tiny tensor library that runs in the browser via WASM', lang:'Rust', langColor:'#dea584'},
+      {name:'helio/pgsync', desc:'Real-time Postgres to search-index streaming sync', lang:'Go', langColor:'#00ADD8'},
+      {name:'mossware/inkwell', desc:'Markdown editor with live multiplayer collaboration', lang:'Svelte', langColor:'#ff3e00'},
+      {name:'dataforge/parqueteer', desc:'Blazing-fast Parquet reader and writer', lang:'C++', langColor:'#f34b7d'},
+      {name:'lumenlabs/flowforge', desc:'Local-first workflow automation engine', lang:'Python', langColor:'#3572A5'},
+      {name:'cobalt/wisp', desc:'A 1kb reactive state library with zero deps', lang:'JavaScript', langColor:'#f1e05a'},
+      {name:'arcgfx/voxel-engine', desc:'GPU-driven voxel renderer with global illumination', lang:'C++', langColor:'#f34b7d'},
+      {name:'fernhq/llm-proxy', desc:'OpenAI-compatible gateway with caching and routing', lang:'Go', langColor:'#00ADD8'},
+      {name:'pyx/notebook-kit', desc:'Composable notebook UI components for data apps', lang:'TypeScript', langColor:'#3178c6'}
+    ];
+    this.sinaRaw = [
+      {title:'央行公开市场加大净投放规模，市场流动性保持合理充裕', tag:'宏观'},
+      {title:'A股三大指数集体收涨，半导体与AI算力板块领涨两市', tag:'A股'},
+      {title:'多家券商上调四季度黄金价格目标，避险需求持续升温', tag:'贵金属'},
+      {title:'港股科技股普遍走强，恒生科技指数盘中涨超2%', tag:'港股'},
+      {title:'比特币站上阶段新高，机构资金净流入连续三周为正', tag:'数字货币'},
+      {title:'新能源汽车月度销量再创新高，产业链龙头普遍受益', tag:'行业'},
+      {title:'海外央行官员释放偏鸽派信号，美股期货盘前走高', tag:'海外'},
+      {title:'国内成品油价格迎来年内新一轮上调，加满一箱多花数元', tag:'能源'},
+      {title:'多只科技龙头获北向资金大额增持，主力持续加仓', tag:'资金'},
+      {title:'监管部门就资本市场新规公开征求意见，重点完善信息披露', tag:'政策'}
+    ];
+    this.sinaTimes = ['2分钟前','7分钟前','13分钟前','21分钟前','34分钟前','46分钟前','58分钟前','1小时前','1小时前','2小时前'];
+  }
+
+  componentDidMount(){
+    this.setState({ theme: (this.props.defaultTheme === 'light' ? 'light' : 'dark') });
+    this.regen(true);
+    this.tick();
+    this._clk = setInterval(() => this.tick(), 1000);
+    this._live = setInterval(() => this.liveTick(), 2300);
+    if (this.props.autoRefresh !== false) this._auto = setInterval(() => this.regen(false), 15000);
+  }
+  componentWillUnmount(){ clearInterval(this._clk); clearInterval(this._live); clearInterval(this._auto); }
+
+  rand(a,b){ return a + Math.random()*(b-a); }
+  fmt(n,d){ return new Intl.NumberFormat('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n); }
+  fmtK(n){ return n>=1000 ? (n/1000).toFixed(1)+'k' : Math.round(n)+''; }
+
+  makeSpark(n){
+    n = n || 26;
+    let v = this.rand(30,70); const pts=[];
+    for(let i=0;i<n;i++){ v += this.rand(-9,9); v=Math.max(6,Math.min(94,v)); pts.push(v); }
+    const min=Math.min.apply(null,pts), max=Math.max.apply(null,pts), range=Math.max(1,max-min);
+    const W=100,H=26;
+    const s = pts.map((p,i)=>{ const x=(i/(n-1))*W; const y=H-((p-min)/range)*(H-4)-2; return x.toFixed(1)+','+y.toFixed(1); }).join(' ');
+    return { points:s, up: pts[pts.length-1] >= pts[0] };
+  }
+
+  mkInst(name, sub, base, dec, ccy){
+    const sp = this.makeSpark();
+    const up = sp.up;
+    const pct = (up?1:-1) * this.rand(0.05, 3.4);
+    const price = base * (1 + pct/100);
+    const chg = price - base;
+    const col = up ? 'var(--up,#34d399)' : 'var(--down,#f87171)';
+    return {
+      name, sub,
+      price: (ccy||'') + this.fmt(price, dec),
+      chg: (chg>=0?'+':'') + this.fmt(chg, dec),
+      pct: (pct>=0?'+':'') + this.fmt(pct, 2) + '%',
+      up, spark: sp.points, stroke: col, col
+    };
+  }
+
+  buildServer(){
+    const cpu=this.rand(26,74), mem=this.rand(48,80), net=this.rand(120,540);
+    const c = (warn)=> warn ? 'var(--down,#f87171)' : 'var(--accent,#3ddc84)';
+    return [
+      { label:'CPU 使用率', big:this.fmt(cpu,0)+'%', pct:cpu, barColor:c(cpu>85), spark:this.makeSpark().points, sub:'8 vCPU · 2.6 GHz · 负载 '+this.fmt(cpu/100*8,2) },
+      { label:'内存', big:this.fmt(mem,0)+'%', pct:mem, barColor:c(mem>88), spark:this.makeSpark().points, sub:this.fmt(mem/100*16,1)+' / 16.0 GB' },
+      { label:'网络 I/O', big:this.fmt(net,0)+' Mbps', pct:Math.min(100,net/6), barColor:c(false), spark:this.makeSpark().points, sub:'↑ '+this.fmt(net*0.3,0)+'   ↓ '+this.fmt(net*0.7,0)+' Mbps' }
+    ];
+  }
+
+  regen(initial){
+    const indices = [
+      this.mkInst('纳斯达克','NASDAQ Composite',21500,2,''),
+      this.mkInst('恒生科技','HSTECH Index',4850,2,''),
+      this.mkInst('现货黄金','XAU / USD',3320,2,'$'),
+      this.mkInst('比特币','BTC / USD',94800,0,'$')
+    ];
+    const holdings = [
+      this.mkInst('美团-W','03690 · HKD',118,2,'HK$'),
+      this.mkInst('阿里巴巴-W','09988 · HKD',84,2,'HK$'),
+      this.mkInst('百度集团-SW','09888 · HKD',92,2,'HK$'),
+      this.mkInst('英伟达 NVDA','NASDAQ · USD',138,2,'$'),
+      this.mkInst('英特尔 INTC','NASDAQ · USD',23,2,'$')
+    ];
+    const hn = this.hnRaw.map((r,i)=>({ rank:i+1, title:r.title, domain:r.domain, points:this.fmtK(this.rand(80,1400)), comments:this.fmtK(this.rand(8,640)) }));
+    const github = this.ghRaw.map((r,i)=>({ rank:i+1, name:r.name, desc:r.desc, lang:r.lang, langColor:r.langColor, stars:this.fmtK(this.rand(900,42000)), today:Math.round(this.rand(40,920)) }));
+    const sina = this.sinaRaw.map((r,i)=>({ rank:i+1, title:r.title, tag:r.tag, time:this.sinaTimes[i] }));
+    this.setState({ server:this.buildServer(), indices, holdings, hn, github, sina, lastUpdated:this.nowStr() });
+  }
+
+  liveTick(){ this.setState({ server:this.buildServer() }); }
+
+  nowStr(){ return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Asia/Shanghai'}).format(new Date()); }
+
+  tick(){
+    const now = new Date();
+    const cd = this.clocks.map(c => ({
+      city:c.city, off:c.off,
+      time: new Intl.DateTimeFormat('en-GB',{timeZone:c.tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(now),
+      date: new Intl.DateTimeFormat('zh-CN',{timeZone:c.tz,month:'long',day:'numeric',weekday:'short'}).format(now)
+    }));
+    this.setState({ clockData: cd });
+  }
+
+  refresh(){
+    if (this.state.refreshing) return;
+    this.setState({ refreshing:true });
+    this.regen(false);
+    setTimeout(()=> this.setState({ refreshing:false }), 700);
+  }
+  toggle(){ this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })); }
+
+  renderVals(){
+    const theme = this.state.theme || 'dark';
+    const isDark = theme !== 'light';
+    return {
+      theme, isDark, isLight: !isDark,
+      accent: this.props.accent || '#3ddc84',
+      refreshing: this.state.refreshing,
+      spinAnim: this.state.refreshing ? 'spin .7s linear infinite' : 'none',
+      lastUpdated: this.state.lastUpdated,
+      clockData: this.state.clockData,
+      server: this.state.server,
+      indices: this.state.indices,
+      holdings: this.state.holdings,
+      hn: this.state.hn,
+      github: this.state.github,
+      sina: this.state.sina,
+      onRefresh: () => this.refresh(),
+      onToggle: () => this.toggle()
+    };
+  }
+}
+</script>
+</body>
+</html>
