@@ -1,0 +1,23 @@
+{
+  "name": "niwa-news",
+  "version": "1.0.0",
+  "private": true,
+  "description": "监控看板 — real-time dashboard backend (server metrics, quotes, HN, GitHub Trending, Sina news)",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "express": "^4.19.2",
+    "systeminformation": "^5.23.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
