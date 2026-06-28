@@ -27,8 +27,11 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 | GitHub Trending | 抓取 github.com/trending（cheerio） |
 | 新浪财经要闻 | Sina 滚动新闻 JSON API |
 
-走势 sparkline 采用「轻量真实」策略：服务器负载与行情价格各维护一个滚动缓冲，
-随后台采样（每 5s）和每次刷新逐步累积出真实近期趋势。
+走势 sparkline：
+- **行情/持仓** 抓取最新**日线**收盘序列绘制真实价格走势（East Money 日线 API，BTC 用
+  CoinGecko market_chart），日线数据按 `TTL_KLINE_MS`（默认 30min）缓存；抓取失败时回退到
+  实时价格滚动缓冲。价格/涨跌幅仍取自实时快照。
+- **服务器负载** 维护滚动缓冲，随后台采样（每 5s）累积真实近期趋势。
 
 ## API
 
@@ -66,7 +69,7 @@ src/
   config.ts          配置与标的列表
   spark.ts           数值序列 → polyline 点串
   format.ts http.ts  格式化与带超时的抓取
-  sources/           server-metrics / hackernews / github / sina-news / quotes
+  sources/           server-metrics / hackernews / github / sina-news / quotes / klines
 ProtoType/     原始设计原型（参考基线，不参与运行）
 ```
 

@@ -72,6 +72,10 @@ export interface SymbolSpec {
   market: 'us' | 'hk' | 'gold' | 'btc';
   /** Sina list code (e.g. "gb_ixic", "rt_hk03690", "hf_XAU"). Ignored for btc. */
   code: string;
+  /** Daily-kline identifier: an East Money secid (e.g. "105.NVDA", "116.03690",
+   *  "124.HSTECH", "101.GC00Y") for non-btc symbols, or the CoinGecko coin id
+   *  for btc ("bitcoin"). Drives the sparkline trend. */
+  klineId: string;
   /** Decimal places for price/change formatting. */
   dec: number;
   /** Currency prefix, e.g. "$", "HK$". */

@@ -15,6 +15,7 @@ import { fetchTextRaw, fetchJson } from '../http.js';
 import { pushSample, getBuffer } from '../cache.js';
 import { sparkLine } from '../spark.js';
 import { fmt } from '../format.js';
+import { getKlineCloses } from './klines.js';
 
 interface Quote {
   price: number;
@@ -83,15 +84,22 @@ async function getBtc(): Promise<Quote> {
 
 // --- Instrument assembly ---
 
-function toInstrument(spec: SymbolSpec, q: Quote): Instrument {
+function toInstrument(spec: SymbolSpec, q: Quote, klineCloses: number[]): Instrument {
   const valid = Number.isFinite(q.price) && Number.isFinite(q.prevClose) && q.prevClose !== 0;
   const price = valid ? q.price : NaN;
   const chg = valid ? price - q.prevClose : NaN;
   const pct = valid ? (chg / q.prevClose) * 100 : NaN;
   const up = !(chg < 0);
 
-  // Grow the rolling sparkline buffer from real prices.
-  const buf = Number.isFinite(price) ? pushSample(`q.${spec.code}`, price) : getBuffer(`q.${spec.code}`);
+  // Sparkline trend comes from the daily-kline closes. If klines are
+  // unavailable, fall back to the rolling intraday buffer of live prices.
+  let spark: string;
+  if (klineCloses.length >= 2) {
+    spark = sparkLine(klineCloses);
+  } else {
+    const buf = Number.isFinite(price) ? pushSample(`q.${spec.code}`, price) : getBuffer(`q.${spec.code}`);
+    spark = sparkLine(buf);
+  }
   const col = up ? UP_COLOR : DOWN_COLOR;
 
   const priceStr = Number.isFinite(price) ? spec.ccy + fmt(price, spec.dec) : '—';
@@ -105,7 +113,7 @@ function toInstrument(spec: SymbolSpec, q: Quote): Instrument {
     chg: chgStr,
     pct: pctStr,
     up,
-    spark: sparkLine(buf),
+    spark,
     stroke: col,
     col,
   };
@@ -143,7 +151,10 @@ export async function getQuotes(specs: SymbolSpec[]): Promise<Instrument[]> {
 
   if (quotes.size === 0) throw new Error('quotes: all sources failed');
 
-  return specs.map((s) =>
-    toInstrument(s, quotes.get(s.code) ?? { price: NaN, prevClose: NaN }),
+  // Daily-kline closes for the sparklines (cached; failures degrade to []).
+  const klines = await Promise.all(specs.map((s) => getKlineCloses(s)));
+
+  return specs.map((s, i) =>
+    toInstrument(s, quotes.get(s.code) ?? { price: NaN, prevClose: NaN }, klines[i]),
   );
 }
