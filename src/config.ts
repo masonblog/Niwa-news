@@ -18,6 +18,9 @@ export const config = {
     hn: num(process.env.TTL_HN_MS, 60_000),
     github: num(process.env.TTL_GITHUB_MS, 5 * 60_000),
     sina: num(process.env.TTL_SINA_MS, 60_000),
+    // Daily klines only change after market close — cache aggressively so the
+    // refresh button doesn't re-pull history on every click.
+    kline: num(process.env.TTL_KLINE_MS, 30 * 60_000),
   },
 
   /** Minimum gap between forced refetches of a source (ms) — protects upstreams
@@ -27,8 +30,11 @@ export const config = {
   /** Background sampler interval (ms) — feeds rolling spark buffers. */
   samplerMs: num(process.env.SAMPLER_MS, 5_000),
 
-  /** Max points kept per rolling spark buffer. */
+  /** Max points kept per rolling spark buffer (fallback when klines fail). */
   sparkPoints: num(process.env.SPARK_POINTS, 26),
+
+  /** Number of trailing daily closes used to draw the price-trend sparkline. */
+  klinePoints: num(process.env.KLINE_POINTS, 30),
 
   /** User-Agent for page/JSON scraping. */
   userAgent:
@@ -37,19 +43,19 @@ export const config = {
 
   /** Index instruments (指数行情 panel). */
   indices: [
-    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', dec: 2, ccy: '' },
-    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', dec: 2, ccy: '' },
-    { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', dec: 2, ccy: '$' },
-    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', dec: 0, ccy: '$' },
+    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', klineId: '100.NDX', dec: 2, ccy: '' },
+    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klineId: '124.HSTECH', dec: 2, ccy: '' },
+    { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', klineId: '101.GC00Y', dec: 2, ccy: '$' },
+    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klineId: 'bitcoin', dec: 0, ccy: '$' },
   ] as SymbolSpec[],
 
   /** Holdings instruments (持仓股票 panel). */
   holdings: [
-    { name: '美团-W', sub: '03690 · HKD', market: 'hk', code: 'rt_hk03690', dec: 2, ccy: 'HK$' },
-    { name: '阿里巴巴-W', sub: '09988 · HKD', market: 'hk', code: 'rt_hk09988', dec: 2, ccy: 'HK$' },
-    { name: '百度集团-SW', sub: '09888 · HKD', market: 'hk', code: 'rt_hk09888', dec: 2, ccy: 'HK$' },
-    { name: '英伟达 NVDA', sub: 'NASDAQ · USD', market: 'us', code: 'gb_nvda', dec: 2, ccy: '$' },
-    { name: '英特尔 INTC', sub: 'NASDAQ · USD', market: 'us', code: 'gb_intc', dec: 2, ccy: '$' },
+    { name: '美团-W', sub: '03690 · HKD', market: 'hk', code: 'rt_hk03690', klineId: '116.03690', dec: 2, ccy: 'HK$' },
+    { name: '阿里巴巴-W', sub: '09988 · HKD', market: 'hk', code: 'rt_hk09988', klineId: '116.09988', dec: 2, ccy: 'HK$' },
+    { name: '百度集团-SW', sub: '09888 · HKD', market: 'hk', code: 'rt_hk09888', klineId: '116.09888', dec: 2, ccy: 'HK$' },
+    { name: '英伟达 NVDA', sub: 'NASDAQ · USD', market: 'us', code: 'gb_nvda', klineId: '105.NVDA', dec: 2, ccy: '$' },
+    { name: '英特尔 INTC', sub: 'NASDAQ · USD', market: 'us', code: 'gb_intc', klineId: '105.INTC', dec: 2, ccy: '$' },
   ] as SymbolSpec[],
 };
 
