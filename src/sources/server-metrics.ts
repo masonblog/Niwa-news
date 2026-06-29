@@ -1,23 +1,24 @@
-// Host metrics for the 服务器负载 panel — CPU%, memory%, network I/O of the
-// machine running this backend. Rolling buffers feed the sparklines and are
-// topped up by the background sampler (server.ts) plus each fetch.
+// Host metrics for the 服务器负载 panel — CPU% and memory% of the machine
+// running this backend, rendered as colour-coded ring gauges. Rolling buffers
+// feed the sparklines and are topped up by the background sampler (server.ts)
+// plus each fetch.
 
 import si from 'systeminformation';
 import os from 'node:os';
 import type { ServerMetric } from '../types.js';
-import { ACCENT_COLOR, DOWN_COLOR } from '../config.js';
 import { pushSample, getBuffer } from '../cache.js';
 import { sparkLine } from '../spark.js';
 import { fmt } from '../format.js';
 
-const warnColor = (warn: boolean) => (warn ? DOWN_COLOR : ACCENT_COLOR);
+// Traffic-light palette for the ring gauges: green when healthy, amber as load
+// climbs, red once it crosses the critical threshold.
+const RING_OK = 'var(--up,#34d399)';
+const RING_WARN = '#fbbf24';
+const RING_CRIT = 'var(--down,#f87171)';
 
-interface NetState {
-  rxBytes: number;
-  txBytes: number;
-  at: number;
-}
-let prevNet: NetState | null = null;
+/** Pick a ring colour for a 0-100 load given warn/critical thresholds. */
+const ringColor = (pct: number, warn: number, crit: number): string =>
+  pct >= crit ? RING_CRIT : pct >= warn ? RING_WARN : RING_OK;
 
 interface RawMetrics {
   cpu: number; // %
@@ -25,31 +26,14 @@ interface RawMetrics {
   memUsedGb: number;
   memTotalGb: number;
   cores: number;
-  rxMbps: number;
-  txMbps: number;
 }
 
 async function read(): Promise<RawMetrics> {
-  const [load, mem, cpu, net] = await Promise.all([
+  const [load, mem, cpu] = await Promise.all([
     si.currentLoad(),
     si.mem(),
     si.cpu(),
-    si.networkStats(),
   ]);
-
-  const totalRx = net.reduce((s, n) => s + (n.rx_bytes || 0), 0);
-  const totalTx = net.reduce((s, n) => s + (n.tx_bytes || 0), 0);
-  const now = Date.now();
-  let rxMbps = 0;
-  let txMbps = 0;
-  if (prevNet) {
-    const dt = (now - prevNet.at) / 1000;
-    if (dt > 0) {
-      rxMbps = Math.max(0, ((totalRx - prevNet.rxBytes) * 8) / 1e6 / dt);
-      txMbps = Math.max(0, ((totalTx - prevNet.txBytes) * 8) / 1e6 / dt);
-    }
-  }
-  prevNet = { rxBytes: totalRx, txBytes: totalTx, at: now };
 
   return {
     cpu: load.currentLoad || 0,
@@ -57,8 +41,6 @@ async function read(): Promise<RawMetrics> {
     memUsedGb: mem.active / 1024 ** 3,
     memTotalGb: mem.total / 1024 ** 3,
     cores: cpu.cores || os.cpus().length || 1,
-    rxMbps,
-    txMbps,
   };
 }
 
@@ -68,27 +50,23 @@ export async function sampleServer(): Promise<void> {
     const m = await read();
     pushSample('srv.cpu', m.cpu);
     pushSample('srv.mem', m.mem);
-    pushSample('srv.net', m.rxMbps + m.txMbps);
   } catch {
     /* sampler is best-effort */
   }
 }
 
-/** Build the three metric cards from the latest sample + rolling history. */
+/** Build the CPU and memory ring gauges from the latest sample + history. */
 export async function getServerMetrics(): Promise<ServerMetric[]> {
   const m = await read();
   pushSample('srv.cpu', m.cpu);
   pushSample('srv.mem', m.mem);
-  pushSample('srv.net', m.rxMbps + m.txMbps);
-
-  const net = m.rxMbps + m.txMbps;
 
   return [
     {
-      label: 'CPU 使用率',
+      label: 'CPU',
       big: fmt(m.cpu, 0) + '%',
       pct: Math.min(100, m.cpu),
-      barColor: warnColor(m.cpu > 85),
+      barColor: ringColor(m.cpu, 70, 85),
       spark: sparkLine(getBuffer('srv.cpu')),
       sub: `${m.cores} vCPU · 负载 ${fmt((m.cpu / 100) * m.cores, 2)}`,
     },
@@ -96,17 +74,9 @@ export async function getServerMetrics(): Promise<ServerMetric[]> {
       label: '内存',
       big: fmt(m.mem, 0) + '%',
       pct: Math.min(100, m.mem),
-      barColor: warnColor(m.mem > 88),
+      barColor: ringColor(m.mem, 75, 88),
       spark: sparkLine(getBuffer('srv.mem')),
       sub: `${fmt(m.memUsedGb, 1)} / ${fmt(m.memTotalGb, 1)} GB`,
-    },
-    {
-      label: '网络 I/O',
-      big: fmt(net, 0) + ' Mbps',
-      pct: Math.min(100, net / 6),
-      barColor: warnColor(false),
-      spark: sparkLine(getBuffer('srv.net')),
-      sub: `↑ ${fmt(m.txMbps, 0)}   ↓ ${fmt(m.rxMbps, 0)} Mbps`,
     },
   ];
 }
