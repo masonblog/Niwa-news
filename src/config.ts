@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { SymbolSpec } from './types.js';
 
 const num = (v: string | undefined, fallback: number): number => {
@@ -35,6 +36,12 @@ export const config = {
 
   /** Number of trailing daily closes used to draw the price-trend sparkline. */
   klinePoints: num(process.env.KLINE_POINTS, 30),
+
+  /** Disk file persisting the daily-kline series across restarts (so a cold
+   *  start serves the last good chart instead of refetching every symbol at
+   *  once). Set KLINE_CACHE_FILE to relocate it. */
+  klineCacheFile:
+    process.env.KLINE_CACHE_FILE || path.join(process.cwd(), '.cache', 'klines.json'),
 
   /** Max concurrent East Money daily-kline requests. A cold cache fires one
    *  request per symbol across both panels at once; firing all ~7 together trips

@@ -41,6 +41,7 @@ src/
   server.ts           Express: static hosting + /api/dashboard + 5s metrics sampler
   aggregate.ts        Calls every source in parallel, assembles DashboardData
   cache.ts            In-memory TTL cache + rolling numeric buffers
+  klineCache.ts       Disk-backed persistent cache for daily-kline series
   config.ts           Port, TTLs, timeouts, instrument lists (env-overridable)
   types.ts            DashboardData + per-panel shapes + SymbolSpec
   spark.ts            number[] -> SVG polyline points string
@@ -72,7 +73,12 @@ ProtoType/         Original design prototype — reference baseline, NOT part of
 - **Colors** use the template's CSS vars: `var(--up,#34d399)` / `var(--down,#f87171)` /
   `var(--accent,#3ddc84)` — emit these literal strings from the backend.
 - **Caching:** read/write through `cache.ts`. `?force=1` bypasses TTL but a 5s
-  `minForceGap` still protects upstreams from rapid refresh clicks.
+  `minForceGap` still protects upstreams from rapid refresh clicks. The
+  **daily-kline trend series** additionally persist through `klineCache.ts` to a
+  JSON file (`.cache/klines.json`, override with `KLINE_CACHE_FILE`): on a cold
+  start `getKlineCloses` serves the persisted chart (within `ttl.kline`) instead
+  of refetching every symbol at once, and falls back to the stale disk copy when
+  an upstream fails.
 
 ## How to extend
 

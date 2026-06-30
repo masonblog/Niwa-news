@@ -30,9 +30,11 @@ export function getStale<T>(key: string): T | undefined {
   return (entries.get(key) as Entry<T> | undefined)?.value;
 }
 
-export function set<T>(key: string, value: T): void {
+/** Store a value. `at` overrides the write time — used to prime the in-memory
+ *  cache from a persisted copy without resetting its freshness. */
+export function set<T>(key: string, value: T, at: number = Date.now()): void {
   const prev = entries.get(key);
-  entries.set(key, { value, at: Date.now(), lastForce: prev?.lastForce ?? 0 });
+  entries.set(key, { value, at, lastForce: prev?.lastForce ?? 0 });
 }
 
 /** Record that a forced refetch was attempted now (called before fetching). */
