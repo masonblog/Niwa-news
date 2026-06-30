@@ -15,7 +15,7 @@ export const config = {
   /** Cache TTL per source (ms). A non-forced request reuses cache within TTL. */
   ttl: {
     quotes: num(process.env.TTL_QUOTES_MS, 30_000),
-    hn: num(process.env.TTL_HN_MS, 60_000),
+    verge: num(process.env.TTL_VERGE_MS, 5 * 60_000),
     github: num(process.env.TTL_GITHUB_MS, 5 * 60_000),
     kr: num(process.env.TTL_KR_MS, 60_000),
     // Daily klines only change after market close — cache aggressively so the

@@ -7,7 +7,7 @@ import { config } from './config.js';
 import { getFresh, getStale, set, markForce } from './cache.js';
 import { nowCst } from './format.js';
 import { getServerMetrics } from './sources/server-metrics.js';
-import { getHackerNews } from './sources/hackernews.js';
+import { getVerge } from './sources/verge.js';
 import { getGithubTrending } from './sources/github.js';
 import { getKrNews } from './sources/kr36.js';
 import { getQuotes } from './sources/quotes.js';
@@ -42,12 +42,12 @@ async function source<T>(
 }
 
 export async function getDashboard(force: boolean): Promise<DashboardData> {
-  const [server, indices, holdings, hn, github, kr] = await Promise.all([
+  const [server, indices, holdings, verge, github, kr] = await Promise.all([
     // Server metrics are always live (cheap, local) — no TTL gating.
     source('server', 0, true, getServerMetrics, []),
     source('indices', config.ttl.quotes, force, () => getQuotes(config.indices), []),
     source('holdings', config.ttl.quotes, force, () => getQuotes(config.holdings), []),
-    source('hn', config.ttl.hn, force, getHackerNews, []),
+    source('verge', config.ttl.verge, force, getVerge, []),
     source('github', config.ttl.github, force, getGithubTrending, []),
     source('kr', config.ttl.kr, force, getKrNews, []),
   ]);
@@ -57,7 +57,7 @@ export async function getDashboard(force: boolean): Promise<DashboardData> {
     server,
     indices,
     holdings,
-    hn,
+    verge,
     github,
     kr,
     errors: { ...errors },
