@@ -10,6 +10,7 @@ import type { SymbolSpec } from '../types.js';
 import { config } from '../config.js';
 import { fetchJson } from '../http.js';
 import { getFresh, getStale, set } from '../cache.js';
+import { getDiskFresh, getDiskStale, setDisk } from '../klineCache.js';
 
 interface EmKlineResp {
   data?: { klines?: string[] } | null;
@@ -81,6 +82,21 @@ async function coingeckoCloses(id: string, days: number): Promise<number[]> {
   return (resp.prices ?? []).map((p) => p[1]).filter((n) => Number.isFinite(n));
 }
 
+/** Fetch, trim, and persist closes for `key`. On failure, degrade to the last
+ *  good value — in-memory first, then the disk copy that survives restarts. */
+async function fetchCloses(key: string, fetcher: () => Promise<number[]>): Promise<number[]> {
+  try {
+    const trimmed = (await fetcher()).slice(-config.klinePoints);
+    if (trimmed.length) {
+      set(key, trimmed);
+      void setDisk(key, trimmed);
+    }
+    return trimmed;
+  } catch {
+    return getStale<number[]>(key) ?? (await getDiskStale(key)) ?? [];
+  }
+}
+
 /** Trailing daily closes for a symbol, cached by klineId. Returns [] on failure
  *  (caller falls back to the rolling intraday buffer). */
 export async function getKlineCloses(spec: SymbolSpec): Promise<number[]> {
@@ -88,17 +104,19 @@ export async function getKlineCloses(spec: SymbolSpec): Promise<number[]> {
   const cached = getFresh<number[]>(key, config.ttl.kline, false);
   if (cached !== undefined) return cached;
 
+  // In-memory miss (cold start or expired TTL). A previous run may have
+  // persisted this series to disk; if it's still within TTL, serve it and prime
+  // the in-memory cache (preserving the original timestamp) without a fetch.
+  const disk = await getDiskFresh(key, config.ttl.kline);
+  if (disk !== undefined) {
+    set(key, disk.value, disk.at);
+    return disk.value;
+  }
+
   // BTC (CoinGecko) is a separate upstream — not subject to East Money's rate
   // limit, so it doesn't go through the throttle.
   if (spec.market === 'btc') {
-    try {
-      const closes = await coingeckoCloses(spec.klineId, config.klinePoints);
-      const trimmed = closes.slice(-config.klinePoints);
-      if (trimmed.length) set(key, trimmed);
-      return trimmed;
-    } catch {
-      return getStale<number[]>(key) ?? [];
-    }
+    return fetchCloses(key, () => coingeckoCloses(spec.klineId, config.klinePoints));
   }
 
   return emThrottle.run(async () => {
@@ -106,13 +124,6 @@ export async function getKlineCloses(spec: SymbolSpec): Promise<number[]> {
     // waited — re-check before spending a request.
     const fresh = getFresh<number[]>(key, config.ttl.kline, false);
     if (fresh !== undefined) return fresh;
-    try {
-      const closes = await eastmoneyCloses(spec.klineId, config.klinePoints);
-      const trimmed = closes.slice(-config.klinePoints);
-      if (trimmed.length) set(key, trimmed);
-      return trimmed;
-    } catch {
-      return getStale<number[]>(key) ?? [];
-    }
+    return fetchCloses(key, () => eastmoneyCloses(spec.klineId, config.klinePoints));
   });
 }
