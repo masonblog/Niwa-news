@@ -44,8 +44,10 @@ export async function getKrNews(): Promise<KrItem[]> {
       subnavType: 1,
       subnavNick: 'web_news',
       pageSize: 30,
-      pageEvent: 1,
-      pageCallback: '',
+      // First page: pageEvent must be 0, and pageCallback must be omitted —
+      // the gateway rejects an empty-string pageCallback with
+      // {"code":1,"msg":"请求分页回调值不能为空"}, yielding an empty feed.
+      pageEvent: 0,
       siteId: 1,
       platformId: 2,
     },
