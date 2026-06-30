@@ -36,6 +36,16 @@ export const config = {
   /** Number of trailing daily closes used to draw the price-trend sparkline. */
   klinePoints: num(process.env.KLINE_POINTS, 30),
 
+  /** Max concurrent East Money daily-kline requests. A cold cache fires one
+   *  request per symbol across both panels at once; firing all ~7 together trips
+   *  East Money's rate limit, which silently drops some (notably US) symbols.
+   *  Throttling keeps every series loading on the first try. */
+  klineConcurrency: num(process.env.KLINE_CONCURRENCY, 2),
+
+  /** Minimum gap between East Money kline request dispatches (ms) — staggers the
+   *  burst even within the concurrency budget. */
+  klineGapMs: num(process.env.KLINE_GAP_MS, 150),
+
   /** User-Agent for page/JSON scraping. */
   userAgent:
     process.env.SCRAPE_UA ||

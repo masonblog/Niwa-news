@@ -15,6 +15,43 @@ interface EmKlineResp {
   data?: { klines?: string[] } | null;
 }
 
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Bounds how many tasks run at once and staggers their start, so a cold-cache
+ *  refresh doesn't fire one East Money request per symbol simultaneously and
+ *  trip rate-limiting (which silently drops some — notably US — series). */
+class Throttle {
+  private active = 0;
+  private waiters: Array<() => void> = [];
+  private lastStart = 0;
+
+  constructor(
+    private readonly concurrency: number,
+    private readonly minGapMs: number,
+  ) {}
+
+  async run<T>(task: () => Promise<T>): Promise<T> {
+    if (this.active >= this.concurrency) {
+      await new Promise<void>((resolve) => this.waiters.push(resolve));
+    }
+    this.active++;
+    const gap = this.minGapMs - (Date.now() - this.lastStart);
+    if (gap > 0) await delay(gap);
+    this.lastStart = Date.now();
+    try {
+      return await task();
+    } finally {
+      this.active--;
+      this.waiters.shift()?.();
+    }
+  }
+}
+
+/** Shared across both panels so the total in-flight East Money request count is
+ *  bounded regardless of how many getQuotes() calls run concurrently. */
+const emThrottle = new Throttle(config.klineConcurrency, config.klineGapMs);
+
 /** Daily closes from East Money. `klines` items are "date,close" strings
  *  (we request fields2=f51,f53). */
 async function eastmoneyCloses(secid: string, lmt: number): Promise<number[]> {
@@ -51,15 +88,31 @@ export async function getKlineCloses(spec: SymbolSpec): Promise<number[]> {
   const cached = getFresh<number[]>(key, config.ttl.kline, false);
   if (cached !== undefined) return cached;
 
-  try {
-    const closes =
-      spec.market === 'btc'
-        ? await coingeckoCloses(spec.klineId, config.klinePoints)
-        : await eastmoneyCloses(spec.klineId, config.klinePoints);
-    const trimmed = closes.slice(-config.klinePoints);
-    if (trimmed.length) set(key, trimmed);
-    return trimmed;
-  } catch {
-    return getStale<number[]>(key) ?? [];
+  // BTC (CoinGecko) is a separate upstream — not subject to East Money's rate
+  // limit, so it doesn't go through the throttle.
+  if (spec.market === 'btc') {
+    try {
+      const closes = await coingeckoCloses(spec.klineId, config.klinePoints);
+      const trimmed = closes.slice(-config.klinePoints);
+      if (trimmed.length) set(key, trimmed);
+      return trimmed;
+    } catch {
+      return getStale<number[]>(key) ?? [];
+    }
   }
+
+  return emThrottle.run(async () => {
+    // A queued caller for the same symbol may have filled the cache while we
+    // waited — re-check before spending a request.
+    const fresh = getFresh<number[]>(key, config.ttl.kline, false);
+    if (fresh !== undefined) return fresh;
+    try {
+      const closes = await eastmoneyCloses(spec.klineId, config.klinePoints);
+      const trimmed = closes.slice(-config.klinePoints);
+      if (trimmed.length) set(key, trimmed);
+      return trimmed;
+    } catch {
+      return getStale<number[]>(key) ?? [];
+    }
+  });
 }
