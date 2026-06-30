@@ -14,7 +14,7 @@ npm run dev            # tsx 热重载，开发用
 npm run build && npm start   # 编译到 dist/ 后以 node 运行
 ```
 
-打开 http://localhost:5173/ （会自动跳转到 `/dashboard.dc.html`）。
+打开 http://localhost:5173/ （直接由 `public/index.html` 提供）。
 
 ## 数据源
 
@@ -55,13 +55,13 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 
 持仓/指数标的列表在 `src/config.ts` 的 `indices` / `holdings` 中维护。
 
-前端 props（在 `public/dashboard.dc.html` 的 `data-props` 中）：`accent`、`defaultTheme`、
+前端 props（在 `public/index.html` 的 `data-props` 中）：`accent`、`defaultTheme`、
 `autoRefresh`、`autoRefreshSec`、`apiBase`（跨域部署时指向后端地址）。
 
 ## 结构
 
 ```
-public/        前端（dashboard.dc.html + support.js）
+public/        前端（index.html + support.js）
 src/
   server.ts          Express：静态托管 + /api + 后台采样器
   aggregate.ts       聚合各源，单源失败降级
