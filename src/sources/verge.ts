@@ -1,5 +1,5 @@
 // The Verge (tech) Top 10 via the site's public feed.
-// https://www.theverge.com/tech/rss/index.xml is an Atom feed; we parse it with
+// https://www.theverge.com/rss/tech/index.xml is an Atom feed; we parse it with
 // cheerio in XML mode and map entries onto the news-panel shape.
 //
 // NOTE: The Verge is not reachable from the build sandbox (network policy denies
@@ -12,7 +12,7 @@ import type { VergeItem } from '../types.js';
 import { fetchText } from '../http.js';
 import { relTimeZh } from '../format.js';
 
-const FEED_URL = 'https://www.theverge.com/tech/rss/index.xml';
+const FEED_URL = 'https://www.theverge.com/rss/tech/index.xml';
 
 export async function getVerge(): Promise<VergeItem[]> {
   const xml = await fetchText(FEED_URL, { headers: { Accept: 'application/xml, text/xml, */*' } });
