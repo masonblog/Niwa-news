@@ -16,6 +16,10 @@
 body{margin:0}
 :root,[data-theme=dark]{--bg:#0d0f11;--bg2:#101316;--panel:#15181c;--panel2:#1c2127;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.11);--text:#e7e9ec;--muted:#8b929b;--faint:#5b636d;--up:#34d399;--down:#f87171}
 [data-theme=light]{--bg:#eceef1;--bg2:#f4f5f7;--panel:#ffffff;--panel2:#f4f6f8;--border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);--text:#15181c;--muted:#5d646d;--faint:#9aa1aa;--up:#15a34a;--down:#dc2626}
+/* Smooth light/dark crossfade: animate the theme-driven colors when
+   [data-theme] flips. Inline transitions on specific elements (progress
+   ring, loadbar) still win the cascade, so their motion is untouched. */
+.app,.app *{transition:background-color .45s ease,border-color .45s ease,color .45s ease,fill .45s ease,stroke .45s ease,box-shadow .45s ease}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -114,6 +118,9 @@ body{margin:0}
           <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="3.1" fill="currentColor"></circle><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="1.1" x2="8" y2="2.7"></line><line x1="8" y1="13.3" x2="8" y2="14.9"></line><line x1="1.1" y1="8" x2="2.7" y2="8"></line><line x1="13.3" y1="8" x2="14.9" y2="8"></line><line x1="3.2" y1="3.2" x2="4.3" y2="4.3"></line><line x1="11.7" y1="11.7" x2="12.8" y2="12.8"></line><line x1="12.8" y1="3.2" x2="11.7" y2="4.3"></line><line x1="4.3" y1="11.7" x2="3.2" y2="12.8"></line></g></svg>
         </sc-if>
       </button>
+      <a href="https://github.com/masonblog/niwa-news" target="_blank" rel="noopener noreferrer" aria-label="GitHub 仓库" title="GitHub 仓库" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;background:var(--panel2,#1c2127);color:var(--text,#e7e9ec);border:1px solid var(--border2,rgba(255,255,255,.11));border-radius:9px;cursor:pointer;text-decoration:none" style-hover="border-color:var(--accent,#3ddc84)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+      </a>
     </div>
   </div>
 
