@@ -9,7 +9,7 @@ live data and serves it as one aggregated JSON payload; a single-page frontend r
 The **refresh button triggers a real backend fetch + update** (not a client-side re-randomize).
 
 Panels: 服务器负载 (host metrics) · 指数行情 (indices) · 持仓股票 (holdings) ·
-Hacker News · GitHub Trending · 新浪财经要闻.
+Hacker News · GitHub Trending · 36氪资讯.
 
 ## Commands
 
@@ -49,7 +49,7 @@ src/
     server-metrics.ts   host CPU/mem/net via systeminformation
     hackernews.ts       HN Firebase API
     github.ts           scrape github.com/trending (cheerio)
-    sina-news.ts        Sina roll-news JSON feed
+    kr36.ts             36Kr information-flow API (web_news/latest)
     quotes.ts           realtime snapshot prices (Sina + CoinGecko)
     klines.ts           daily-kline close series for sparklines (East Money + CoinGecko)
 ProtoType/         Original design prototype — reference baseline, NOT part of runtime

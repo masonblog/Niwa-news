@@ -4,6 +4,10 @@ interface FetchOpts {
   headers?: Record<string, string>;
   /** Override default timeout. */
   timeoutMs?: number;
+  /** HTTP method (default GET). */
+  method?: string;
+  /** Request body for non-GET methods. */
+  body?: string;
 }
 
 async function withTimeout(url: string, opts: FetchOpts): Promise<Response> {
@@ -11,6 +15,8 @@ async function withTimeout(url: string, opts: FetchOpts): Promise<Response> {
   const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? config.fetchTimeoutMs);
   try {
     const res = await fetch(url, {
+      method: opts.method,
+      body: opts.body,
       signal: ctrl.signal,
       headers: { 'User-Agent': config.userAgent, ...opts.headers },
     });

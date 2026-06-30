@@ -1,5 +1,5 @@
 // Shared shapes for the dashboard payload. Field names mirror the prototype's
-// template bindings (server/indices/holdings/hn/github/sina) so the frontend
+// template bindings (server/indices/holdings/hn/github/kr) so the frontend
 // template needs no structural changes — only its data source.
 
 export interface ServerMetric {
@@ -43,7 +43,7 @@ export interface GithubItem {
   url: string;
 }
 
-export interface SinaItem {
+export interface KrItem {
   rank: number;
   title: string;
   tag: string;
@@ -58,7 +58,7 @@ export interface DashboardData {
   holdings: Instrument[];
   hn: HnItem[];
   github: GithubItem[];
-  sina: SinaItem[];
+  kr: KrItem[];
   errors: Record<string, string>;
 }
 

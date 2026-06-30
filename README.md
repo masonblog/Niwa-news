@@ -1,6 +1,6 @@
 # Niwa 监控看板
 
-实时监控看板：服务器负载、指数行情、持仓股票、Hacker News、GitHub Trending、新浪财经要闻。
+实时监控看板：服务器负载、指数行情、持仓股票、Hacker News、GitHub Trending、36氪资讯。
 前端基于 "Design Component" 运行时（`public/support.js`），数据由一个 Node.js + TypeScript
 后端实时抓取并通过 `/api/dashboard` 提供。**点击刷新按钮即触发后端重新抓取并更新看板**，
 同时支持可配置的定时自动刷新。
@@ -25,7 +25,7 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 | 持仓股票 | Sina 行情（港股 + 美股） |
 | Hacker News | HN 官方 Firebase API |
 | GitHub Trending | 抓取 github.com/trending（cheerio） |
-| 新浪财经要闻 | Sina 滚动新闻 JSON API |
+| 36氪资讯 | 36Kr 资讯信息流 API（web_news/latest） |
 
 走势 sparkline：
 - **行情/持仓** 抓取最新**日线**收盘序列绘制真实价格走势（East Money 日线 API，BTC 用
@@ -49,7 +49,7 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 | --- | --- | --- |
 | `PORT` | `5173` | HTTP 端口 |
 | `FETCH_TIMEOUT_MS` | `8000` | 每个上游请求超时 |
-| `TTL_QUOTES_MS` / `TTL_HN_MS` / `TTL_GITHUB_MS` / `TTL_SINA_MS` | `30s / 60s / 5min / 60s` | 各源缓存 TTL |
+| `TTL_QUOTES_MS` / `TTL_HN_MS` / `TTL_GITHUB_MS` / `TTL_KR_MS` | `30s / 60s / 5min / 60s` | 各源缓存 TTL |
 | `MIN_FORCE_GAP_MS` | `5000` | 强制刷新最小间隔 |
 | `SAMPLER_MS` | `5000` | 后台采样间隔 |
 
@@ -69,11 +69,11 @@ src/
   config.ts          配置与标的列表
   spark.ts           数值序列 → polyline 点串
   format.ts http.ts  格式化与带超时的抓取
-  sources/           server-metrics / hackernews / github / sina-news / quotes / klines
+  sources/           server-metrics / hackernews / github / kr36 / quotes / klines
 ProtoType/     原始设计原型（参考基线，不参与运行）
 ```
 
 ## 备注
 
-GitHub Trending 与 Sina 属页面/接口抓取，依赖其结构稳定；已通过缓存限流、单源降级与
+GitHub Trending、36氪与 Sina 行情属页面/接口抓取，依赖其结构稳定；已通过缓存限流、单源降级与
 解析兜底降低脆弱性，供个人看板使用。
