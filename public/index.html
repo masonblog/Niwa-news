@@ -41,9 +41,14 @@ body{margin:0}
   .app{height:auto!important;min-height:100vh;overflow:visible!important;padding:10px!important;gap:10px!important}
   .topbar{justify-content:center!important;gap:12px 18px!important}
   .grid{grid-template-columns:minmax(0,1fr)!important;flex:none!important;gap:10px!important}
-  /* Cards size to a capped height and keep their own internal scroll so a
-     stacked column stays navigable rather than becoming one giant page. */
-  .card{min-height:300px!important;max-height:72vh}
+  /* Mobile is one continuous top-to-bottom scroll, so cards lay everything
+     out in full (no height cap) and their inner bodies drop their own
+     scrollbar — the page itself does the scrolling. Desktop/tablet keep the
+     capped card + internal scroll so wide-screen panels don't overflow. */
+  .card{min-height:0!important;max-height:none!important}
+  .card .scroll{overflow:visible!important;flex:none!important}
+  /* Sticky sub-headers only make sense inside a scroll box; pin-free in flow. */
+  .mkt-head{position:static!important}
 }
 @media (max-width:400px){
   .topbar-clocks{padding-left:0!important;border-left:none!important;gap:24px!important}
@@ -120,7 +125,7 @@ body{margin:0}
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">实时</span>
       </div>
       <div class="scroll" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px">
-        <div style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:2px 6px 7px">指数行情</div>
+        <div class="mkt-head" style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:2px 6px 7px">指数行情</div>
         <sc-for list="{{ indices }}" as="x" hint-placeholder-count="4">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:7px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
@@ -128,7 +133,7 @@ body{margin:0}
             <div style="text-align:right;min-width:90px"><div style="font:600 15px 'IBM Plex Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'IBM Plex Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.pct }}</div></div>
           </div>
         </sc-for>
-        <div style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:12px 6px 7px">持仓股票</div>
+        <div class="mkt-head" style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:12px 6px 7px">持仓股票</div>
         <sc-for list="{{ holdings }}" as="x" hint-placeholder-count="5">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:5px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
