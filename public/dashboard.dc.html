@@ -31,14 +31,44 @@ body{margin:0}
     <div style="position:absolute;top:0;left:0;height:100%;width:40%;border-radius:0 3px 3px 0;background:linear-gradient(90deg,transparent,var(--accent,#3ddc84),transparent);animation:{{ barAnim }}"></div>
   </div>
 
-  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:space-between;background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:11px 16px">
-    <div style="display:flex;flex-direction:column;gap:4px;min-width:160px">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;justify-content:space-between;background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:10px 16px">
+    <div style="display:flex;flex-direction:column;gap:4px;min-width:150px">
       <div style="display:flex;align-items:center;gap:9px">
         <span style="width:9px;height:9px;border-radius:50%;background:var(--accent,#3ddc84);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent,#3ddc84) 22%,transparent);animation:pulse 2.2s infinite"></span>
         <span style="font:800 17px/1 Inter;letter-spacing:.01em">监控看板</span>
         <span style="font:700 9px/1 Inter;letter-spacing:.16em;color:var(--accent,#3ddc84);border:1px solid color-mix(in srgb,var(--accent,#3ddc84) 42%,transparent);padding:3px 6px;border-radius:5px">LIVE</span>
       </div>
       <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:{{ statusColor }}">{{ statusText }}</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <sc-for list="{{ server }}" as="m" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:9px;min-width:0">
+          <div style="position:relative;width:42px;height:42px;flex:none">
+            <svg viewBox="0 0 100 100" style="width:42px;height:42px;display:block">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border2,rgba(255,255,255,.11))" stroke-width="11"></circle>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="{{ m.barColor }}" stroke-width="11" stroke-linecap="round" pathLength="100" stroke-dasharray="{{ m.pct }} 100" transform="rotate(-90 50 50)" style="transition:stroke-dasharray .6s ease,stroke .3s ease"></circle>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+              <div style="font:600 10px/1 'IBM Plex Mono',monospace;color:{{ m.barColor }}">{{ m.big }}</div>
+            </div>
+          </div>
+          <div style="min-width:0">
+            <div style="font:700 10px/1 Inter;letter-spacing:.07em;text-transform:uppercase;color:var(--text,#e7e9ec)">{{ m.label }}</div>
+            <div style="font:500 10px/1.3 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:4px;white-space:nowrap">{{ m.sub }}</div>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display:flex;align-items:center;gap:16px;padding-left:16px;border-left:1px solid var(--border,rgba(255,255,255,.06))">
+        <sc-for list="{{ clockData }}" as="c" hint-placeholder-count="2">
+          <div style="text-align:center;min-width:0">
+            <div style="font:700 8px/1 Inter;letter-spacing:.11em;text-transform:uppercase;color:var(--muted,#8b929b);white-space:nowrap">{{ c.city }} · {{ c.off }}</div>
+            <div style="font:600 17px/1 'IBM Plex Mono',monospace;letter-spacing:.02em;margin-top:4px;white-space:nowrap">{{ c.time }}</div>
+            <div style="font:500 9px/1 Inter;color:var(--faint,#5b636d);margin-top:4px;white-space:nowrap">{{ c.date }}</div>
+          </div>
+        </sc-for>
+      </div>
     </div>
 
     <div style="display:flex;align-items:center;gap:8px">
@@ -57,51 +87,15 @@ body{margin:0}
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:12px;flex:1;min-height:0;grid-auto-rows:minmax(0,1fr);opacity:{{ contentOpacity }};transition:opacity .3s ease">
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;flex:1;min-height:0;opacity:{{ contentOpacity }};transition:opacity .3s ease">
 
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>服务器负载</span>
-        <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%">{{ host }}</span>
-      </div>
-      <div style="display:flex;gap:14px;flex:1;min-height:0">
-        <div style="display:flex;flex-direction:column;gap:12px;flex:1;justify-content:center;min-width:0">
-          <sc-for list="{{ server }}" as="m" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:12px;min-width:0">
-              <div style="position:relative;width:70px;height:70px;flex:none">
-                <svg viewBox="0 0 100 100" style="width:70px;height:70px;display:block">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border2,rgba(255,255,255,.11))" stroke-width="9"></circle>
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="{{ m.barColor }}" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="{{ m.pct }} 100" transform="rotate(-90 50 50)" style="transition:stroke-dasharray .6s ease,stroke .3s ease"></circle>
-                </svg>
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-                  <div style="font:600 16px/1 'IBM Plex Mono',monospace;color:{{ m.barColor }}">{{ m.big }}</div>
-                </div>
-              </div>
-              <div style="min-width:0">
-                <div style="font:700 11px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--text,#e7e9ec)">{{ m.label }}</div>
-                <div style="font:500 11px/1.3 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:5px">{{ m.sub }}</div>
-              </div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;justify-content:center;flex:none;padding-left:14px;border-left:1px solid var(--border,rgba(255,255,255,.06))">
-          <sc-for list="{{ clockData }}" as="c" hint-placeholder-count="2">
-            <div style="text-align:center;min-width:0">
-              <div style="font:700 9px/1 Inter;letter-spacing:.12em;text-transform:uppercase;color:var(--muted,#8b929b);white-space:nowrap">{{ c.city }} · {{ c.off }}</div>
-              <div style="font:600 21px/1 'IBM Plex Mono',monospace;letter-spacing:.02em;margin-top:5px;white-space:nowrap">{{ c.time }}</div>
-              <div style="font:500 10px/1 Inter;color:var(--faint,#5b636d);margin-top:5px;white-space:nowrap">{{ c.date }}</div>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>指数行情</span>
+        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>行情</span>
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">实时</span>
       </div>
-      <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between">
+      <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px">
+        <div style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:2px 6px 7px">指数行情</div>
         <sc-for list="{{ indices }}" as="x" hint-placeholder-count="4">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:7px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
@@ -109,15 +103,7 @@ body{margin:0}
             <div style="text-align:right;min-width:90px"><div style="font:600 15px 'IBM Plex Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'IBM Plex Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.pct }}</div></div>
           </div>
         </sc-for>
-      </div>
-    </div>
-
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 13px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>持仓股票</span>
-        <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">{{ holdingsCount }} 个标的</span>
-      </div>
-      <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between">
+        <div style="position:sticky;top:0;z-index:1;background:var(--panel,#15181c);font:700 10px/1 Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#8b929b);padding:12px 6px 7px;display:flex;align-items:center;justify-content:space-between"><span>持仓股票</span><span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);text-transform:none;letter-spacing:0">{{ holdingsCount }} 个标的</span></div>
         <sc-for list="{{ holdings }}" as="x" hint-placeholder-count="5">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:5px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
@@ -127,9 +113,6 @@ body{margin:0}
         </sc-for>
       </div>
     </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,1fr));gap:12px;flex:1;min-height:0;grid-auto-rows:minmax(0,1fr);opacity:{{ contentOpacity }};transition:opacity .3s ease">
 
     <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
