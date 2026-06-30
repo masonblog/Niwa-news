@@ -19,8 +19,7 @@ app.get('/api/dashboard', async (req, res) => {
   }
 });
 
-// Serve the frontend; / → the dc.html so the runtime infers the root name.
-app.get('/', (_req, res) => res.redirect('/dashboard.dc.html'));
+// Serve the frontend; express.static resolves / to public/index.html.
 app.use(express.static(publicDir));
 
 app.listen(config.port, () => {

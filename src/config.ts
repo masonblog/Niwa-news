@@ -17,7 +17,7 @@ export const config = {
     quotes: num(process.env.TTL_QUOTES_MS, 30_000),
     hn: num(process.env.TTL_HN_MS, 60_000),
     github: num(process.env.TTL_GITHUB_MS, 5 * 60_000),
-    sina: num(process.env.TTL_SINA_MS, 60_000),
+    kr: num(process.env.TTL_KR_MS, 60_000),
     // Daily klines only change after market close — cache aggressively so the
     // refresh button doesn't re-pull history on every click.
     kline: num(process.env.TTL_KLINE_MS, 30 * 60_000),
