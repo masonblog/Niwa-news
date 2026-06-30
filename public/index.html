@@ -30,15 +30,33 @@ body{margin:0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 @keyframes contentin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* Responsive layout. Inline styles can't hold media queries, so the layout
+   elements carry helper classes (.app/.topbar/.grid/.card) that these rules
+   override with !important (inline styles otherwise win the cascade). */
+@media (max-width:1100px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (max-width:680px){
+  /* Phone: let the page scroll instead of locking everything into 100vh. */
+  .app{height:auto!important;min-height:100vh;overflow:visible!important;padding:10px!important;gap:10px!important}
+  .topbar{justify-content:center!important;gap:12px 18px!important}
+  .grid{grid-template-columns:minmax(0,1fr)!important;flex:none!important;gap:10px!important}
+  /* Cards size to a capped height and keep their own internal scroll so a
+     stacked column stays navigable rather than becoming one giant page. */
+  .card{min-height:300px!important;max-height:72vh}
+}
+@media (max-width:400px){
+  .topbar-clocks{padding-left:0!important;border-left:none!important;gap:24px!important}
+}
 </style>
 </helmet>
-<div data-screen-label="监控看板" data-theme="{{ theme }}" style="--accent:{{ accent }};position:relative;height:100vh;overflow:hidden;background:var(--bg,#0d0f11);color:var(--text,#e7e9ec);font-family:Inter,system-ui,-apple-system,sans-serif;padding:14px;display:flex;flex-direction:column;gap:12px">
+<div class="app" data-screen-label="监控看板" data-theme="{{ theme }}" style="--accent:{{ accent }};position:relative;height:100vh;overflow:hidden;background:var(--bg,#0d0f11);color:var(--text,#e7e9ec);font-family:Inter,system-ui,-apple-system,sans-serif;padding:14px;display:flex;flex-direction:column;gap:12px">
 
   <div style="position:absolute;top:0;left:0;right:0;height:3px;z-index:50;overflow:hidden;pointer-events:none;opacity:{{ barOpacity }};transition:opacity .35s ease">
     <div style="position:absolute;top:0;left:0;height:100%;width:40%;border-radius:0 3px 3px 0;background:linear-gradient(90deg,transparent,var(--accent,#3ddc84),transparent);animation:{{ barAnim }}"></div>
   </div>
 
-  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;justify-content:space-between;background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:10px 16px">
+  <div class="topbar" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;justify-content:space-between;background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:10px 16px">
     <div style="display:flex;flex-direction:column;gap:4px;min-width:150px">
       <div style="display:flex;align-items:center;gap:9px">
         <span style="width:9px;height:9px;border-radius:50%;background:var(--accent,#3ddc84);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent,#3ddc84) 22%,transparent);animation:pulse 2.2s infinite"></span>
@@ -67,7 +85,7 @@ body{margin:0}
         </div>
       </sc-for>
 
-      <div style="display:flex;align-items:center;gap:38px;padding-left:16px;border-left:1px solid var(--border,rgba(255,255,255,.06))">
+      <div class="topbar-clocks" style="display:flex;align-items:center;gap:38px;padding-left:16px;border-left:1px solid var(--border,rgba(255,255,255,.06))">
         <sc-for list="{{ clockData }}" as="c" hint-placeholder-count="2">
           <div style="text-align:center;min-width:78px">
             <div style="font:700 8px/1 Inter;letter-spacing:.11em;text-transform:uppercase;color:var(--muted,#8b929b);white-space:nowrap">{{ c.city }} · {{ c.off }}</div>
@@ -94,9 +112,9 @@ body{margin:0}
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;flex:1;min-height:0;opacity:{{ contentOpacity }};transition:opacity .3s ease">
+  <div class="grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;flex:1;min-height:0;opacity:{{ contentOpacity }};transition:opacity .3s ease">
 
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+    <div class="card" style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--accent,#3ddc84)"></span>行情</span>
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">实时</span>
@@ -121,7 +139,7 @@ body{margin:0}
       </div>
     </div>
 
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+    <div class="card" style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:#4d9fff"></span>36氪资讯</span>
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">Top 10</span>
@@ -137,7 +155,7 @@ body{margin:0}
       </div>
     </div>
 
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+    <div class="card" style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:#5200ff"></span>The Verge</span>
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">Top 10</span>
@@ -153,7 +171,7 @@ body{margin:0}
       </div>
     </div>
 
-    <div style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
+    <div class="card" style="background:var(--panel,#15181c);border:1px solid var(--border,rgba(255,255,255,.06));border-radius:14px;padding:14px 15px 8px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <span style="display:flex;align-items:center;gap:8px;font:700 12px/1 Inter;letter-spacing:.05em;text-transform:uppercase"><span style="width:4px;height:14px;border-radius:2px;background:var(--text,#e7e9ec)"></span>GitHub Trending</span>
         <span style="font:500 10px 'IBM Plex Mono',monospace;color:var(--faint,#5b636d)">Today</span>
