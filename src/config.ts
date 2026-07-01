@@ -43,14 +43,14 @@ export const config = {
   klineCacheFile:
     process.env.KLINE_CACHE_FILE || path.join(process.cwd(), '.cache', 'klines.json'),
 
-  /** Max concurrent East Money daily-kline requests. A cold cache fires one
-   *  request per symbol across both panels at once; firing all ~7 together trips
-   *  East Money's rate limit, which silently drops some (notably US) symbols.
-   *  Throttling keeps every series loading on the first try. */
+  /** Max concurrent daily-kline requests to the upstream chart source. A cold
+   *  cache fires one request per symbol across both panels at once; firing all
+   *  ~7 together can trip an upstream's rate limit, which silently drops some
+   *  series. Throttling keeps every series loading on the first try. */
   klineConcurrency: num(process.env.KLINE_CONCURRENCY, 2),
 
-  /** Minimum gap between East Money kline request dispatches (ms) — staggers the
-   *  burst even within the concurrency budget. */
+  /** Minimum gap between kline request dispatches (ms) — staggers the burst even
+   *  within the concurrency budget. */
   klineGapMs: num(process.env.KLINE_GAP_MS, 150),
 
   /** User-Agent for page/JSON scraping. */
@@ -60,19 +60,19 @@ export const config = {
 
   /** Index instruments (指数行情 panel). */
   indices: [
-    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', klineId: '100.NDX', dec: 2, ccy: '' },
-    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klineId: '124.HSTECH', dec: 2, ccy: '' },
-    { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', klineId: '101.GC00Y', dec: 2, ccy: '$' },
-    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klineId: 'bitcoin', dec: 0, ccy: '$' },
+    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', klinePrimaryId: '^IXIC', klineId: '100.NDX', dec: 2, ccy: '' },
+    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klinePrimaryId: '^HSTECH', klineId: '124.HSTECH', dec: 2, ccy: '' },
+    { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', klinePrimaryId: 'GC=F', klineId: '101.GC00Y', dec: 2, ccy: '$' },
+    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klinePrimaryId: 'BTC-USD', klineId: 'bitcoin', dec: 0, ccy: '$' },
   ] as SymbolSpec[],
 
   /** Holdings instruments (持仓股票 panel). */
   holdings: [
-    { name: '美团-W', sub: '03690 · HKD', market: 'hk', code: 'rt_hk03690', klineId: '116.03690', dec: 2, ccy: 'HK$' },
-    { name: '阿里巴巴-W', sub: '09988 · HKD', market: 'hk', code: 'rt_hk09988', klineId: '116.09988', dec: 2, ccy: 'HK$' },
-    { name: '百度集团-SW', sub: '09888 · HKD', market: 'hk', code: 'rt_hk09888', klineId: '116.09888', dec: 2, ccy: 'HK$' },
-    { name: '英伟达 NVDA', sub: 'NASDAQ · USD', market: 'us', code: 'gb_nvda', klineId: '105.NVDA', dec: 2, ccy: '$' },
-    { name: '英特尔 INTC', sub: 'NASDAQ · USD', market: 'us', code: 'gb_intc', klineId: '105.INTC', dec: 2, ccy: '$' },
+    { name: '美团-W', sub: '03690 · HKD', market: 'hk', code: 'rt_hk03690', klinePrimaryId: '3690.HK', klineId: '116.03690', dec: 2, ccy: 'HK$' },
+    { name: '阿里巴巴-W', sub: '09988 · HKD', market: 'hk', code: 'rt_hk09988', klinePrimaryId: '9988.HK', klineId: '116.09988', dec: 2, ccy: 'HK$' },
+    { name: '百度集团-SW', sub: '09888 · HKD', market: 'hk', code: 'rt_hk09888', klinePrimaryId: '9888.HK', klineId: '116.09888', dec: 2, ccy: 'HK$' },
+    { name: '英伟达 NVDA', sub: 'NASDAQ · USD', market: 'us', code: 'gb_nvda', klinePrimaryId: 'NVDA', klineId: '105.NVDA', dec: 2, ccy: '$' },
+    { name: '英特尔 INTC', sub: 'NASDAQ · USD', market: 'us', code: 'gb_intc', klinePrimaryId: 'INTC', klineId: '105.INTC', dec: 2, ccy: '$' },
   ] as SymbolSpec[],
 };
 
