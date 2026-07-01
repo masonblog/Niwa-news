@@ -107,6 +107,10 @@ throws on failure; add a `source(...)` call in `aggregate.ts`; add the field to
 - **East Money klines** (now the non-btc backup) are keyed by `secid` (`105.NVDA`, `116.03690`,
   `124.HSTECH`, `101.GC00Y`, ...). Their latest daily close matches the Sina snapshot price — a
   useful cross-check. `100.HSTECH`/`118.XAU`/`100.IXIC` return empty; the working secids are in config.
+- **HSTECH primary is an ETF proxy (known):** Yahoo returns empty for the `^HSTECH` index,
+  so `klinePrimaryId` for 恒生科技 uses `3033.HK` (iShares Hang Seng TECH ETF, tracks the index).
+  Only the normalized sparkline shape uses it; price/pct come from Sina `rt_hkHSTECH`, and the
+  backup stays EM `124.HSTECH`.
 - **Gold mismatch (known):** snapshot price is Sina spot `hf_XAU`; the sparkline uses EM
   COMEX gold futures `101.GC00Y` (EM has no spot-XAU daily). Trend matches; absolute values
   differ slightly (spot vs futures).
