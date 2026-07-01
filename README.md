@@ -1,6 +1,6 @@
 # Niwa 监控看板
 
-实时监控看板：服务器负载、指数行情、持仓股票、36氪资讯、The Verge、GitHub Trending。
+实时监控看板：服务器负载、指数行情、持仓股票、36氪资讯、TechCrunch、GitHub Trending。
 前端基于 "Design Component" 运行时（`public/support.js`），数据由一个 Node.js + TypeScript
 后端实时抓取并通过 `/api/dashboard` 提供。**点击刷新按钮即触发后端重新抓取并更新看板**，
 同时支持可配置的定时自动刷新。
@@ -23,7 +23,7 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 | 服务器负载 | 本机 CPU/内存/网络 I/O（`systeminformation`） |
 | 指数行情 | Sina 行情（纳指/恒生科技/现货黄金）+ CoinGecko（BTC） |
 | 持仓股票 | Sina 行情（港股 + 美股） |
-| The Verge | The Verge 科技板块 Atom 订阅源（cheerio xml） |
+| TechCrunch | TechCrunch RSS 订阅源（cheerio xml） |
 | GitHub Trending | 抓取 github.com/trending（cheerio） |
 | 36氪资讯 | 36Kr 资讯信息流 API（web_news/latest） |
 
@@ -51,7 +51,7 @@ npm run build && npm start   # 编译到 dist/ 后以 node 运行
 | --- | --- | --- |
 | `PORT` | `5173` | HTTP 端口 |
 | `FETCH_TIMEOUT_MS` | `8000` | 每个上游请求超时 |
-| `TTL_QUOTES_MS` / `TTL_VERGE_MS` / `TTL_GITHUB_MS` / `TTL_KR_MS` | `30s / 5min / 5min / 60s` | 各源缓存 TTL |
+| `TTL_QUOTES_MS` / `TTL_TECHCRUNCH_MS` / `TTL_GITHUB_MS` / `TTL_KR_MS` | `30s / 5min / 5min / 60s` | 各源缓存 TTL |
 | `MIN_FORCE_GAP_MS` | `5000` | 强制刷新最小间隔 |
 | `SAMPLER_MS` | `5000` | 后台采样间隔 |
 
@@ -71,7 +71,7 @@ src/
   config.ts          配置与标的列表
   spark.ts           数值序列 → polyline 点串
   format.ts http.ts  格式化与带超时的抓取
-  sources/           server-metrics / verge / github / kr36 / quotes / klines
+  sources/           server-metrics / techcrunch / github / kr36 / quotes / klines
 ProtoType/     原始设计原型（参考基线，不参与运行）
 ```
 
