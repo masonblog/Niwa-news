@@ -66,7 +66,7 @@ export const config = {
     // sparkline only needs the normalized trend shape (price/pct come from Sina).
     { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klinePrimaryId: '3033.HK', klineId: '124.HSTECH', dec: 2, ccy: '' },
     { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', klinePrimaryId: 'GC=F', klineId: '101.GC00Y', dec: 2, ccy: '$' },
-    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klinePrimaryId: 'BTC-USD', klineId: 'bitcoin', dec: 0, ccy: '$' },
+    { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klinePrimaryId: 'BTC-USD', klineId: 'bitcoin', dec: 2, ccy: '$' },
   ] as SymbolSpec[],
 
   /** Holdings instruments (持仓股票 panel). */
