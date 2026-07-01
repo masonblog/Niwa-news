@@ -52,7 +52,7 @@ src/
     github.ts           scrape github.com/trending (cheerio)
     kr36.ts             36Kr information-flow API (web_news/latest)
     quotes.ts           realtime snapshot prices (Sina + CoinGecko)
-    klines.ts           daily-kline close series for sparklines (East Money + CoinGecko)
+    klines.ts           daily-kline close series for sparklines (Yahoo primary → East Money/CoinGecko backup)
 ProtoType/         Original design prototype — reference baseline, NOT part of runtime
 ```
 
@@ -84,8 +84,10 @@ ProtoType/         Original design prototype — reference baseline, NOT part of
 
 **Add an instrument** (index or holding): append a `SymbolSpec` to `config.indices` /
 `config.holdings`. Required fields: `name, sub, market ('us'|'hk'|'gold'|'btc'), code`
-(Sina list code for the snapshot), `klineId` (East Money secid, or CoinGecko id for btc),
-`dec`, `ccy`. Verify the `code`/`klineId` against live data before committing.
+(Sina list code for the snapshot), `klinePrimaryId` (Yahoo Finance ticker — the primary
+kline source), `klineId` (backup source: East Money secid, or CoinGecko id for btc; also the
+cache key), `dec`, `ccy`. Verify the `code`/`klinePrimaryId`/`klineId` against live data before
+committing.
 
 **Add a panel/source:** create `src/sources/<name>.ts` exporting an async fetcher that
 throws on failure; add a `source(...)` call in `aggregate.ts`; add the field to
@@ -97,9 +99,18 @@ throws on failure; add a `source(...)` call in `aggregate.ts`; add the field to
   return GBK bytes — `http.ts#fetchTextRaw` decodes as latin1 (we only read ASCII numerics).
   Field layouts differ per market; `quotes.ts` derives change from price vs prevClose
   rather than trusting a specific change-field index.
-- **East Money klines** are keyed by `secid` (`105.NVDA`, `116.03690`, `124.HSTECH`,
-  `101.GC00Y`, ...). Their latest daily close matches the Sina snapshot price — a useful
-  cross-check. `100.HSTECH`/`118.XAU`/`100.IXIC` return empty; the working secids are in config.
+- **Kline sources (primary → backup):** `klines.ts#getKlineCloses` tries `klinePrimaryId`
+  (Yahoo Finance chart API, `query1.finance.yahoo.com/v8/finance/chart/<ticker>`) first, then
+  falls back to `klineId` (East Money for non-btc, CoinGecko for btc) when the primary throws
+  or returns nothing. Yahoo prefers split/dividend-adjusted closes and drops `null` holiday
+  gaps (`Number(null)===0`, so guard against zeroing gaps). Requests are throttled together.
+- **East Money klines** (now the non-btc backup) are keyed by `secid` (`105.NVDA`, `116.03690`,
+  `124.HSTECH`, `101.GC00Y`, ...). Their latest daily close matches the Sina snapshot price — a
+  useful cross-check. `100.HSTECH`/`118.XAU`/`100.IXIC` return empty; the working secids are in config.
+- **HSTECH primary is an ETF proxy (known):** Yahoo returns empty for the `^HSTECH` index,
+  so `klinePrimaryId` for 恒生科技 uses `3033.HK` (iShares Hang Seng TECH ETF, tracks the index).
+  Only the normalized sparkline shape uses it; price/pct come from Sina `rt_hkHSTECH`, and the
+  backup stays EM `124.HSTECH`.
 - **Gold mismatch (known):** snapshot price is Sina spot `hf_XAU`; the sparkline uses EM
   COMEX gold futures `101.GC00Y` (EM has no spot-XAU daily). Trend matches; absolute values
   differ slightly (spot vs futures).
