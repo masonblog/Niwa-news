@@ -9,7 +9,7 @@ live data and serves it as one aggregated JSON payload; a single-page frontend r
 The **refresh button triggers a real backend fetch + update** (not a client-side re-randomize).
 
 Panels: 服务器负载 (host metrics) · 指数行情 (indices) · 持仓股票 (holdings) ·
-36氪资讯 · The Verge · GitHub Trending.
+36氪资讯 · TechCrunch · GitHub Trending.
 
 ## Commands
 
@@ -48,7 +48,7 @@ src/
   format.ts http.ts   number formatting; fetch with timeout/UA helpers
   sources/
     server-metrics.ts   host CPU/mem/net via systeminformation
-    verge.ts            The Verge tech Atom feed (cheerio xml)
+    techcrunch.ts       TechCrunch RSS feed (cheerio xml)
     github.ts           scrape github.com/trending (cheerio)
     kr36.ts             36Kr information-flow API (web_news/latest)
     quotes.ts           realtime snapshot prices (Sina + CoinGecko)

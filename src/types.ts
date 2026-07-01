@@ -1,6 +1,6 @@
 // Shared shapes for the dashboard payload. Field names mirror the prototype's
-// template bindings (server/indices/holdings/verge/github/kr) so the frontend
-// template needs no structural changes — only its data source.
+// template bindings (server/indices/holdings/techcrunch/github/kr) so the
+// frontend template needs no structural changes — only its data source.
 
 export interface ServerMetric {
   label: string;
@@ -23,7 +23,7 @@ export interface Instrument {
   col: string;
 }
 
-export interface VergeItem {
+export interface TechCrunchItem {
   rank: number;
   title: string;
   author: string;
@@ -55,7 +55,7 @@ export interface DashboardData {
   server: ServerMetric[];
   indices: Instrument[];
   holdings: Instrument[];
-  verge: VergeItem[];
+  techcrunch: TechCrunchItem[];
   github: GithubItem[];
   kr: KrItem[];
   errors: Record<string, string>;
