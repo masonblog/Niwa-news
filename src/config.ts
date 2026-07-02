@@ -60,11 +60,11 @@ export const config = {
 
   /** Index instruments (指数行情 panel). */
   indices: [
-    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', klinePrimaryId: '^IXIC', klineId: '100.NDX', dec: 2, ccy: '$' },
+    { name: '纳斯达克', sub: 'NASDAQ Composite', market: 'us', code: 'gb_ixic', klinePrimaryId: '^IXIC', klineId: '100.NDX', dec: 2, ccy: '' },
     // Yahoo has no reliable ^HSTECH index series (returns empty), so the primary
     // uses the iShares Hang Seng TECH ETF (3033.HK) which tracks the index — the
     // sparkline only needs the normalized trend shape (price/pct come from Sina).
-    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klinePrimaryId: '3033.HK', klineId: '124.HSTECH', dec: 2, ccy: 'HK$' },
+    { name: '恒生科技', sub: 'HSTECH Index', market: 'hk', code: 'rt_hkHSTECH', klinePrimaryId: '3033.HK', klineId: '124.HSTECH', dec: 2, ccy: '' },
     { name: '现货黄金', sub: 'XAU / USD', market: 'gold', code: 'hf_XAU', klinePrimaryId: 'GC=F', klineId: '101.GC00Y', dec: 2, ccy: '$' },
     { name: '比特币', sub: 'BTC / USD', market: 'btc', code: 'bitcoin', klinePrimaryId: 'BTC-USD', klineId: 'bitcoin', dec: 2, ccy: '$' },
   ] as SymbolSpec[],
