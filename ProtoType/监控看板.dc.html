@@ -101,7 +101,7 @@ body{margin:0}
         <sc-for list="{{ indices }}" as="x" hint-placeholder-count="4">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:7px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
-            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:58px;height:24px;overflow:visible"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
+            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:58px;height:24px;overflow:visible;margin-right:14px"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
             <div style="text-align:right;min-width:90px"><div style="font:600 15px 'JetBrains Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'JetBrains Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.pct }}</div></div>
           </div>
         </sc-for>
@@ -117,7 +117,7 @@ body{margin:0}
         <sc-for list="{{ holdings }}" as="x" hint-placeholder-count="5">
           <div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:5px 6px;border-radius:8px;border-top:1px solid var(--border,rgba(255,255,255,.06))" style-hover="background:var(--panel2,#1c2127)">
             <div style="min-width:0"><div style="font:700 14px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.name }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color:var(--faint,#5b636d);margin-top:2px">{{ x.sub }}</div></div>
-            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:54px;height:22px;overflow:visible"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
+            <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:54px;height:22px;overflow:visible;margin-right:14px"><polyline points="{{ x.spark }}" fill="none" stroke-width="1.6" vector-effect="non-scaling-stroke" style="stroke:{{ x.stroke }}"></polyline></svg>
             <div style="text-align:right;min-width:96px"><div style="font:600 15px 'JetBrains Mono',monospace">{{ x.price }}</div><div style="font:600 11px 'JetBrains Mono',monospace;color:{{ x.col }};margin-top:2px">{{ x.chg }} {{ x.pct }}</div></div>
           </div>
         </sc-for>
@@ -288,8 +288,8 @@ class Component extends DCLogic {
 
   regen(initial){
     const indices = [
-      this.mkInst('纳斯达克','NASDAQ Composite',21500,2,''),
-      this.mkInst('恒生科技','HSTECH Index',4850,2,''),
+      this.mkInst('纳斯达克','NASDAQ Composite',21500,2,'$'),
+      this.mkInst('恒生科技','HSTECH Index',4850,2,'HK$'),
       this.mkInst('现货黄金','XAU / USD',3320,2,'$'),
       this.mkInst('比特币','BTC / USD',94800,0,'$')
     ];
